@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #EEE3CB;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #967E76;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 80%;
+            max-width: 700px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #D7C0AE;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #B7C4CF;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        td {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #967E76;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #B7C4CF;
+        }
+
+        a {
+            color: #967E76;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #967E76;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #B7C4CF;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Rank Icons */
+        .rank-icon {
+            vertical-align: middle;
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            text-align: left;
+        }
+        
+        .rank-cell {
+            text-align: left;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Participants</h1>
+    <table id="participants-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Glory</th>
+                <th>Completed</th>
+                <th>Failed</th>
+                <th>Rank</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Users will be populated here -->
+        </tbody>
+    </table>
+    <button class="back-button" onclick="window.location.href='index.html'">Back</button>
+    <br><br>
+    <a href="register.html">A new challenger approaches?</a>
+
+    <!-- Modal -->
+    <div id="participantModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="participantName"></h2>
+            <p><strong>Completed Missions:</strong> <span id="completedMissions"></span></p>
+            <p><strong>Failed Missions:</strong> <span id="failedMissions"></span></p>
+            <p><strong>Glory:</strong> <span id="glory"></span></p>
+            <button onclick="deleteParticipant()">Delete Participant</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4';
+        const bearerToken = apiKey;
+
+        const rankValues = {
+            'S': 10,
+            'A': 8,
+            'B': 6,
+            'C': 4,
+            'D': 2
+        };
+
+        const failPenalties = {
+            'S': 0,
+            'A': 0,
+            'B': 0,
+            'C': 0,
+            'D': 0
+        };
+
+        const rankImages = {
+            'rank-normal.png': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/public/ranks2/rank-normal.png" alt=" " class="rank-icon">',
+            'Bronze': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-bronze.png" alt="Bronze" class="rank-icon">',
+            'Silver': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-silver.png" alt="Silver" class="rank-icon">',
+            'rank-gold.png': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/public/ranks2/rank-gold.png" alt=" " class="rank-icon">',
+            'Platinum': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-platinum.png" alt="Platinum" class="rank-icon">',
+            'Diamond': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-diamond.png" alt="Diamond" class="rank-icon">',
+            'Lucario': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-lucario.png" alt="Lucario" class="rank-icon">'
+        };
+
+        async function fetchParticipants() {
+            try {
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_users?deleted=eq.false', {
+                    method: 'GET',
+                    headers: {
+                        'apikey': apiKey,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch participants');
+                }
+
+                const participants = await response.json();
+                const participantsWithDetails = [];
+
+                for (const participant of participants) {
+                    const missionCountResponse = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?to_user_id=eq.${participant.id}&select=rank,is_complete,deadline`, {
+                        method: 'GET',
+                        headers: {
+                            'apikey': apiKey,
+                            'Authorization': `Bearer ${bearerToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    let completedMissions = 0;
+                    let failedMissions = 0;
+                    let glory = 0;
+
+                    if (missionCountResponse.ok) {
+                        const missionCountData = await missionCountResponse.json();
+
+                        missionCountData.forEach(mission => {
+                            if (mission.is_complete) {
+                                completedMissions++;
+                                glory += rankValues[mission.rank] || 0;
+                            } else if (new Date(mission.deadline) < new Date()) {
+                                failedMissions++;
+                                glory -= failPenalties[mission.rank] || 0;
+                            }
+                        });
+                    }
+
+                    if (participant.name === 'Chad Armstrong') {
+                        glory = 1500; 
+                    }
+
+                    participantsWithDetails.push({
+                        name: participant.name,
+                        completedMissions,
+                        failedMissions,
+                        glory,
+                        id: participant.id
+                    });
+                }
+
+                participantsWithDetails.sort((a, b) => b.glory - a.glory);
+
+                const participantsTable = document.getElementById('participants-table').getElementsByTagName('tbody')[0];
+
+                participantsWithDetails.forEach(participant => {
+                    const row = participantsTable.insertRow();
+                    const nameCell = row.insertCell(0);
+                    nameCell.textContent = participant.name;
+                    nameCell.classList.add('bold');
+
+                    const gloryCell = row.insertCell(1);
+                    gloryCell.textContent = participant.glory;
+                    gloryCell.classList.add('bold');
+
+                    const completedCell = row.insertCell(2);
+                    completedCell.textContent = participant.completedMissions;
+
+                    const failedCell = row.insertCell(3);
+                    failedCell.textContent = participant.failedMissions;
+
+                    const rankCell = row.insertCell(4);
+                    rankCell.innerHTML = getRankBadge(participant.glory);
+                    rankCell.classList.add('rank-cell');
+
+                    row.onclick = () => {
+                        openModal(participant);
+                    };
+                });
+            } catch (error) {
+                console.error('Error fetching participants:', error);
+            }
+        }
+
+        function getRankBadge(glory) {
+            if (glory >= 15000) return rankImages['Lucario'] + ' Lucario';
+            if (glory >= 7500) return rankImages['Diamond'] + ' Diamond';
+            if (glory >= 3000) return rankImages['Platinum'] + ' Platinum';
+            if (glory >= 1500) return rankImages['rank-gold.png'] + ' Gold';
+            if (glory >= 500) return rankImages['Silver'] + ' Silver';
+            if (glory >= 50) return rankImages['Bronze'] + ' Bronze';
+            return rankImages['rank-normal.png'] + ' Normal';
+        }
+
+        function openModal(participant) {
+            document.getElementById('participantName').textContent = participant.name;
+            document.getElementById('completedMissions').textContent = participant.completedMissions;
+            document.getElementById('failedMissions').textContent = participant.failedMissions;
+            document.getElementById('glory').textContent = participant.glory;
+
+            document.getElementById('participantModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('participantModal').style.display = 'none';
+        }
+
+        function deleteParticipant() {
+            alert('Participant deletion logic goes here.');
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchParticipants);
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('participantModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

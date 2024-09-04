@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Board</title>
+    <style>
+        body {
+            background-color: #EEE3CB;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #967E76;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 80%;
+            background-color: #D7C0AE;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #B7C4CF;
+        }
+
+        th {
+            background-color: #B7C4CF;
+            color: white;
+        }
+
+        td.description {
+            max-width: 150px; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer; 
+        }
+
+        button {
+            background-color: #967E76;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #B7C4CF;
+        }
+
+        #backButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #967E76;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #backButton:hover {
+            background-color: #B7C4CF;
+        }
+
+        .completed {
+            opacity: 0.6;
+            background-color: #B7C4CF;
+        }
+
+        .bold-text {
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 50%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .popup-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .popup-actions button {
+            width: 30%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mission Board</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Rank</th>
+                <th>To</th>
+                <th>Deadline</th>
+            </tr>
+        </thead>
+        <tbody id="missionBoard">
+            <!-- Missions will be dynamically inserted here -->
+        </tbody>
+    </table>
+    <br>
+    <button id="backButton" onclick="window.location.href='index.html'">Back</button>
+
+    <!-- The Modal -->
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalDescription"></h2>
+            <p id="modalDetails"></p>
+            <div class="popup-actions">
+                <button id="completeButton">Complete</button>
+                <button id="editButton">Edit</button>
+                <button id="deleteButton">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bearerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4'; 
+        const modal = document.getElementById("descriptionModal");
+        const modalDescription = document.getElementById("modalDescription");
+        const modalDetails = document.getElementById("modalDetails");
+        const closeModal = document.getElementsByClassName("close")[0];
+        const completeButton = document.getElementById("completeButton");
+        const editButton = document.getElementById("editButton");
+        const deleteButton = document.getElementById("deleteButton");
+
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        async function fetchMissions() {
+            try {
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?deleted=eq.false&select=*,from_user_id(name,email),to_user_id(email,name)&order=created_at.desc', {
+                    method: 'GET',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch missions');
+                }
+
+                const missions = await response.json();
+                const missionBoard = document.getElementById('missionBoard');
+                missionBoard.innerHTML = '';
+
+                missions.forEach(mission => {
+                    const row = document.createElement('tr');
+                    if (mission.is_complete) {
+                        row.classList.add('completed');
+                    }
+
+                    row.onclick = function() {
+                        openModal(mission);
+                    }
+
+                    const descriptionCell = document.createElement('td');
+                    descriptionCell.textContent = mission.description;
+                    descriptionCell.classList.add('description', 'bold-text');
+                    row.appendChild(descriptionCell);
+
+                    const rankCell = document.createElement('td');
+                    rankCell.textContent = mission.rank;
+                    rankCell.classList.add('bold-text');
+                    rankCell.style.textAlign = 'center';
+                    row.appendChild(rankCell);
+
+                    const toCell = document.createElement('td');
+                    toCell.textContent = mission.to_user_id.name;
+                    row.appendChild(toCell);
+
+                    const deadlineCell = document.createElement('td');
+                    const currentDate = new Date();
+                    const deadlineDate = new Date(mission.deadline);
+                    const timeDifference = deadlineDate - currentDate;
+                    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
+
+                    if (mission.is_complete) {
+                        deadlineCell.textContent = 'Completed';
+                    } else if (hoursDifference < 0) {
+                        deadlineCell.textContent = 'Dead';
+                    } else if (hoursDifference < 24) {
+                        deadlineCell.textContent = `${hoursDifference} hours`;
+                    } else {
+                        const daysDifference = Math.floor(hoursDifference / 24);
+                        deadlineCell.textContent = `${daysDifference}+ days`;
+                    }
+
+                    row.appendChild(deadlineCell);
+
+                    missionBoard.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching missions:', error);
+            }
+        }
+
+        function openModal(mission) {
+            modalDescription.textContent = mission.description;
+            modalDetails.innerHTML = `
+                <strong>From:</strong> ${mission.from_user_id.name}<br>
+                <strong>Date Assigned:</strong> ${new Date(mission.created_at).toLocaleDateString('en-GB')}<br>
+                <strong>Rank:</strong> ${mission.rank}<br>
+            `;
+
+            completeButton.textContent = mission.is_complete ? 'Undo' : 'Complete';
+
+            completeButton.onclick = async function() {
+                await updateMissionStatus(mission.id, !mission.is_complete);
+                modal.style.display = "none";
+                fetchMissions();
+            };
+
+            editButton.onclick = function() {
+                const newDescription = prompt("Enter new description:", mission.description);
+                const newRank = prompt("Enter new rank (S, A, B, C, D):", mission.rank);
+
+                if (newDescription !== null && newRank !== null) {
+                    updateMissionDetails(mission.id, newDescription, newRank);
+                    modal.style.display = "none";
+                    fetchMissions();
+                }
+            };
+
+            deleteButton.onclick = async function() {
+                await deleteMission(mission.id);
+                modal.style.display = "none";
+                fetchMissions();
+            };
+
+            modal.style.display = "block";
+        }
+
+        async function updateMissionStatus(missionId, isComplete) {
+            try {
+                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_complete: isComplete })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update mission status');
+                }
+            } catch (error) {
+                console.error('Error updating mission status:', error);
+            }
+        }
+
+        async function updateMissionDetails(missionId, description, rank) {
+            try {
+                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ description, rank })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update mission details');
+                }
+            } catch (error) {
+                console.error('Error updating mission details:', error);
+            }
+        }
+
+        async function deleteMission(missionId) {
+            try {
+                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ deleted: true })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete mission');
+                }
+            } catch (error) {
+                console.error('Error deleting mission:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchMissions);
+    </script>
+</body>
+</html>

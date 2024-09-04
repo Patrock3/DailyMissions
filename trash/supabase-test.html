@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase REST API Test</title>
+</head>
+<body>
+    <h1>Testing Supabase REST API</h1>
+    <div id="status">Making Request...</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Make a basic GET request to the Supabase REST API
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/users', {
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4'
+                    }
+                });
+
+                const data = await response.json();
+                document.getElementById('status').textContent = 'Request successful: ' + JSON.stringify(data);
+                console.log('Request successful:', data);
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error making request: ' + error.message;
+                console.error('Error making request:', error.message);
+            }
+        });
+    </script>
+</body>
+</html>

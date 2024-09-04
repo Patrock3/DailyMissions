@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+</head>
+<body>
+    <h1>Leaderboard</h1>
+    <table border="1" id="leaderboard-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/users', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const users = await response.json();
+                const tbody = document.querySelector('#leaderboard-table tbody');
+
+                // Loop through the data and insert rows into the table
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    </script>
+</body>
+</html>

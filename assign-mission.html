@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign a Mission</title>
+    <style>
+        body {
+            background-color: #EEE3CB;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #967E76;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            width: 300px;
+            margin: 0 auto;
+            background-color: #D7C0AE;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #967E76;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #B7C4CF;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .radio-group label {
+            font-weight: normal;
+        }
+
+        .radio-group-2 {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #967E76;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #B7C4CF;
+        }
+
+        #backButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #967E76;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #backButton:hover {
+            background-color: #B7C4CF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Assign a Mission</h1>
+    <form id="assignMissionForm">
+        <label for="fromUser">From:</label>
+        <select id="fromUser" name="fromUser">
+            <option value="">Select a user</option>
+        </select>
+
+        <label for="toUser">To:</label>
+        <select id="toUser" name="toUser">
+            <option value="">Select a user</option>
+        </select>
+
+        <label for="description">Mission Description:</label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="rank">Mission Ranking</label>
+        <div class="radio-group">
+            <label><input type="radio" name="rank" value="S">S</label>
+            <label><input type="radio" name="rank" value="A">A</label>
+            <label><input type="radio" name="rank" value="B">B</label>
+            <label><input type="radio" name="rank" value="C">C</label>
+            <label><input type="radio" name="rank" value="D">D</label>
+        </div>
+
+        <label for="deadline">Deadline:</label>
+        <div class="radio-group">
+            <label><input type="radio" name="deadline" value="24 hours">24 hours</label>
+            <label><input type="radio" name="deadline" value="7 days">7 days</label>
+            <label><input type="radio" name="deadline" value="1 month">1 month</label>
+        </div>
+        <div class="radio-group">
+            <label><input type="radio" name="deadline" value="2 months">2 months</label>
+            <label><input type="radio" name="deadline" value="6 months">6 months</label>
+            <label><input type="radio" name="deadline" value="1 year">1 year</label>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <button id="backButton" onclick="window.location.href='index.html'">Back</button>
+
+    <script>
+        const bearerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_users?deleted=eq.false&select=*', {
+                    method: 'GET',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch users');
+                }
+
+                const users = await response.json();
+                const fromUserSelect = document.getElementById('fromUser');
+                const toUserSelect = document.getElementById('toUser');
+
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+
+                    fromUserSelect.appendChild(option.cloneNode(true));
+                    toUserSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                document.querySelector('form').insertAdjacentHTML('beforeend', '<p>Failed to fetch users. Please try again.</p>');
+            }
+        });
+
+        document.getElementById('assignMissionForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const fromUser = document.getElementById('fromUser').value;
+            const toUser = document.getElementById('toUser').value;
+            const description = document.getElementById('description').value;
+            const rank = document.querySelector('input[name="rank"]:checked').value;
+            const deadlineOption = document.querySelector('input[name="deadline"]:checked').value;
+
+            const createdAt = new Date();
+            let deadline;
+            if (deadlineOption === "24 hours") {
+                deadline = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+            } else if (deadlineOption === "7 days") {
+                deadline = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+            } else if (deadlineOption === "1 month") {
+                deadline = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+            } else if (deadlineOption === "2 months") {
+                deadline = new Date(createdAt.getTime() + 60 * 24 * 60 * 60 * 1000);
+            } else if (deadlineOption === "6 months") {
+                deadline = new Date(createdAt.getTime() + 182 * 24 * 60 * 60 * 1000);
+            } else if (deadlineOption === "1 year") {
+                deadline = new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000);
+            }
+
+            try {
+                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': bearerToken,
+                        'Authorization': `Bearer ${bearerToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from_user_id: fromUser,
+                        to_user_id: toUser,
+                        description,
+                        rank,
+                        created_at: createdAt.toISOString(),
+                        deadline: deadline.toISOString(),
+                        is_complete: false,
+                        deleted: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to assign mission');
+                }
+
+                alert('Mission Assigned Correctly');
+                window.location.href = 'mission-board.html';
+            } catch (error) {
+                console.error('Error assigning mission:', error);
+                alert('Something went wrong. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
