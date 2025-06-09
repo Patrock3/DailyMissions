@@ -4,84 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #EEE3CB;
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
-            color: #967E76;
+            color: #334155;
             text-align: center;
-            margin-bottom: 20px;
+            margin: 40px 0 20px;
+            font-weight: 600;
         }
 
         table {
             margin: 0 auto;
             border-collapse: collapse;
-            width: 80%;
-            background-color: #D7C0AE;
+            width: 85%;
+            background-color: #ffffff;
             border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
 
         th, td {
             text-align: center;
-            padding: 10px;
-            border: 1px solid #B7C4CF;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         th {
-            background-color: #B7C4CF;
-            color: white;
+            background-color: #334155;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
         }
 
         td.description {
-            max-width: 150px; 
+            max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            cursor: pointer; 
+            cursor: pointer;
         }
 
         button {
-            background-color: #967E76;
-            color: white;
-            padding: 8px 12px;
+            background-color: #334155;
+            color: #ffffff;
+            padding: 8px 16px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
 
         button:hover {
-            background-color: #B7C4CF;
+            background-color: #475569;
         }
 
         #backButton {
             display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #967E76;
-            color: white;
+            margin: 30px auto 40px;
+            padding: 12px 24px;
+            background-color: #334155;
+            color: #ffffff;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
             text-align: center;
+            transition: background-color 0.2s;
         }
 
         #backButton:hover {
-            background-color: #B7C4CF;
+            background-color: #475569;
         }
 
         .completed {
             opacity: 0.6;
-            background-color: #B7C4CF;
+            background-color: #e2e8f0;
         }
 
         .bold-text {
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .modal {
@@ -93,35 +108,36 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
         .modal-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
+            background-color: #ffffff;
+            margin: 10% auto;
+            padding: 30px;
             border-radius: 10px;
-            width: 50%;
+            width: 60%;
             max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .close {
-            color: #aaa;
+            color: #94a3b8;
             float: right;
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
         }
 
         .close:hover,
         .close:focus {
-            color: #000;
+            color: #334155;
             text-decoration: none;
             cursor: pointer;
         }
 
         .popup-actions {
-            margin-top: 20px;
+            margin-top: 30px;
             display: flex;
             justify-content: space-between;
         }
