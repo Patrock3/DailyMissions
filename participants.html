@@ -179,8 +179,6 @@
     </div>
 
     <script>
-        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4';
-        const bearerToken = apiKey;
 
         const rankValues = {
             'S': 10,
@@ -199,22 +197,20 @@
         };
 
         const rankImages = {
-            'rank-normal.png': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/public/ranks2/rank-normal.png" alt=" " class="rank-icon">',
-            'Bronze': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-bronze.png" alt="Bronze" class="rank-icon">',
-            'Silver': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-silver.png" alt="Silver" class="rank-icon">',
-            'rank-gold.png': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/public/ranks2/rank-gold.png" alt=" " class="rank-icon">',
-            'Platinum': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-platinum.png" alt="Platinum" class="rank-icon">',
-            'Diamond': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-diamond.png" alt="Diamond" class="rank-icon">',
-            'Lucario': '<img src="https://vxippwwolwoddycukixb.supabase.co/storage/v1/object/sign/ranks/rank-lucario.png" alt="Lucario" class="rank-icon">'
+            'rank-normal.png': '<img src="rank-images/rank-normal.png" alt=" " class="rank-icon">',
+            'Bronze': '<img src="rank-images/rank-bronze.png" alt="Bronze" class="rank-icon">',
+            'Silver': '<img src="rank-images/rank-silver.png" alt="Silver" class="rank-icon">',
+            'rank-gold.png': '<img src="rank-images/rank-gold.png" alt=" " class="rank-icon">',
+            'Platinum': '<img src="rank-images/rank-platinum.png" alt="Platinum" class="rank-icon">',
+            'Diamond': '<img src="rank-images/rank-diamond.png" alt="Diamond" class="rank-icon">',
+            'Lucario': '<img src="rank-images/rank-lucario.png" alt="Lucario" class="rank-icon">'
         };
 
         async function fetchParticipants() {
             try {
-                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_users?deleted=eq.false', {
+                const response = await fetch('/api/pat_users', {
                     method: 'GET',
                     headers: {
-                        'apikey': apiKey,
-                        'Authorization': `Bearer ${bearerToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -227,11 +223,9 @@
                 const participantsWithDetails = [];
 
                 for (const participant of participants) {
-                    const missionCountResponse = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?to_user_id=eq.${participant.id}&select=rank,is_complete,deadline`, {
+                    const missionCountResponse = await fetch(`/api/pat_missions?to_user_id=${participant.id}`, {
                         method: 'GET',
                         headers: {
-                            'apikey': apiKey,
-                            'Authorization': `Bearer ${bearerToken}`,
                             'Content-Type': 'application/json'
                         }
                     });
