@@ -164,7 +164,6 @@
     </div>
 
     <script>
-        const bearerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aXBwd3dvbHdvZGR5Y3VraXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NjIxOTEsImV4cCI6MjA0MDAzODE5MX0.V41TdyR8rlt5h6oavIZ0FJv7PnEBAvhiRLdQ1fzA3P4'; 
         const modal = document.getElementById("descriptionModal");
         const modalDescription = document.getElementById("modalDescription");
         const modalDetails = document.getElementById("modalDetails");
@@ -185,11 +184,9 @@
 
         async function fetchMissions() {
             try {
-                const response = await fetch('https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?deleted=eq.false&select=*,from_user_id(name,email),to_user_id(email,name)&order=created_at.desc', {
+                const response = await fetch('/api/pat_missions', {
                     method: 'GET',
                     headers: {
-                        'apikey': bearerToken,
-                        'Authorization': `Bearer ${bearerToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -291,11 +288,9 @@
 
         async function updateMissionStatus(missionId, isComplete) {
             try {
-                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                const response = await fetch(`/api/pat_missions/${missionId}`, {
                     method: 'PATCH',
                     headers: {
-                        'apikey': bearerToken,
-                        'Authorization': `Bearer ${bearerToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ is_complete: isComplete })
@@ -311,11 +306,9 @@
 
         async function updateMissionDetails(missionId, description, rank) {
             try {
-                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                const response = await fetch(`/api/pat_missions/${missionId}`, {
                     method: 'PATCH',
                     headers: {
-                        'apikey': bearerToken,
-                        'Authorization': `Bearer ${bearerToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ description, rank })
@@ -331,11 +324,9 @@
 
         async function deleteMission(missionId) {
             try {
-                const response = await fetch(`https://vxippwwolwoddycukixb.supabase.co/rest/v1/pat_missions?id=eq.${missionId}`, {
+                const response = await fetch(`/api/pat_missions/${missionId}`, {
                     method: 'PATCH',
                     headers: {
-                        'apikey': bearerToken,
-                        'Authorization': `Bearer ${bearerToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ deleted: true })
